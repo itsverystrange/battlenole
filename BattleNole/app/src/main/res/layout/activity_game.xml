@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.android.battleship.Game">
+
+    <!-- Header -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@drawable/grid_blue"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:weightSum="3"
+        android:id="@+id/header">
+
+        <ImageButton
+            android:id="@+id/myShips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0"
+            android:adjustViewBounds="false"
+            android:background="@drawable/ic_btn_ship"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/headerTextView"
+            style="@style/messages"/>
+    </LinearLayout>
+    <!-- End Header -->
+
+    <!-- Grid -->
+
+    <!-- Grid -->
+
+    <TextView
+        android:id="@+id/play_tv1"
+        android:layout_weight="0"
+        android:layout_marginBottom="20dp"
+        android:text="@string/make_move"
+        android:textColor="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/white"
+        >
+
+        <GridView
+            android:id="@+id/setup_gridview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.8"
+            android:background="@android:color/black"
+            android:gravity="center"
+            android:horizontalSpacing="1dp"
+            android:numColumns="10"
+            android:stretchMode="columnWidth">
+
+
+        </GridView>
+
+    </FrameLayout>
+
+    <!-- End Grid -->
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:weightSum="5"
+        android:background="@drawable/grid_blue"
+        android:gravity="center_horizontal"
+        android:id="@+id/footer"
+        >
+
+        <!-- Ship Status -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:id="@+id/ship_status"
+            android:weightSum="2">
+
+            <!-- Ship Status Top -->
+            <LinearLayout
+                android:id="@+id/ship_status_top"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:gravity="center"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/submarine"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/submarine"
+                    android:layout_gravity="bottom"/>
+
+                <ImageView
+                    android:id="@+id/small_ship"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/small_ship"
+                    android:layout_gravity="bottom"/>
+
+                <ImageView
+                    android:id="@+id/battleship"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/battleship"/>
+
+            </LinearLayout>
+            <!-- End Ship Status Top -->
+
+            <!-- Ship Status Bottom -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/ship_status_btm"
+                android:weightSum="2"
+                android:gravity="center"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/destroyer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/destroyer"/>
+
+                <ImageView
+                    android:id="@+id/aircraft_carrier"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/aircraft_carrier"
+                    />
+            </LinearLayout>
+            <!-- End Ship Status Bottom -->
+
+        </LinearLayout>
+        <!-- End Ship Status -->
+
+        <!-- Fire Button -->
+        <Button
+            android:id="@+id/fire"
+            style="@style/btnStyleFire"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+        <!-- End Fire Button -->
+
+    </LinearLayout>
+
+    <!-- End Footer -->
+    <TextView
+        android:id="@+id/play_tv2"
+        android:textColor="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>
