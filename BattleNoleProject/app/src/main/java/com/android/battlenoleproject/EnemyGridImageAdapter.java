@@ -1,8 +1,8 @@
 package com.android.battlenoleproject; /**
  * Created by srandall on 7/12/15.
  */
-
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -18,9 +18,7 @@ public class EnemyGridImageAdapter extends BaseAdapter {
 
     private static Ship[] fleet;
 
-    private static ArrayList<Integer> board;
-
-    private static GameFactory game;
+    private static Board board;
 
     private static final Random r = new Random();
 
@@ -53,14 +51,19 @@ public class EnemyGridImageAdapter extends BaseAdapter {
     };
 
 
-    public EnemyGridImageAdapter(Context c, GameFactory sentGame, int player) {
+    public EnemyGridImageAdapter(Context c, Board sentBoard, int player ) {
 
-        game = new GameFactory(sentGame);
-        this.playerNumber = player;
 
-        this.enemyNumber = game.getOpposite(player);
+        board = sentBoard;
+        playerNumber = player;
+        enemyNumber = Game.getOpposite(player);
 
         mContext = c;
+    }
+
+    public void swapBoards(Board newBoard) {
+        board = newBoard;
+        notifyDataSetChanged();
     }
 
 
@@ -120,11 +123,10 @@ public class EnemyGridImageAdapter extends BaseAdapter {
     public int getImageResource(int position) {
 
         int imageResource = R.drawable.white;
-        int boardValue = game.getBoardCellValueByPlayer(this.enemyNumber, position);
-
+        int boardValue = board.getElementAtBoardPosition(position);
 
         if (boardValue == 61) { /// this is fire hit or miss
-            imageResource = R.drawable.water;
+            imageResource = R.drawable.miss;
         }
 
         else if(boardValue == 62)
@@ -137,6 +139,7 @@ public class EnemyGridImageAdapter extends BaseAdapter {
         return imageResource;
 
     }
+
 
 
 

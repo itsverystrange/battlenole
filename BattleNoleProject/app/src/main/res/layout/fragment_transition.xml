@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="160dp"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+        android:layout_marginBottom="160dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:padding="@dimen/padding_medium"
+        android:id="@+id/buttonPlayer2Ready"
+        android:text="@string/button_player2_ready"
+        android:background="@drawable/shape"/>
+
+</LinearLayout>

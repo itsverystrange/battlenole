@@ -19,30 +19,23 @@
         />
 
     <Button
-        android:id="@+id/computerGame"
+        android:id="@+id/multiplayer"
         style="@style/btnStyleMain"
-        android:text="@string/play_computer"
+        android:text="Multiplayer"
         />
 
     <Button
-        android:id="@+id/humanGame"
+        android:id="@+id/againstComputer"
         style="@style/btnStyleMain"
-        android:text="@string/play_human"/>
+        android:text="Computer"/>
 
-
-    <Button
-        android:id="@+id/help"
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/previous"
+        android:src="@drawable/ic_arrow_back_black_24dp"
+        android:layout_gravity="center_horizontal"
         style="@style/btnStyleMain"
-        android:text="@string/help"/>
-
-    <Button
-        android:id="@+id/credits"
-        style="@style/btnStyleMain"
-        android:text="@string/credits"/>
-
-    <Button
-        android:id="@+id/exit"
-        style="@style/btnStyleMain"
-        android:text="@string/exit"/>
+        android:layout_marginTop="30dp"/>
 
 </LinearLayout>

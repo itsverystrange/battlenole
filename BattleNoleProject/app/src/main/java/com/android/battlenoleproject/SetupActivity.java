@@ -3,6 +3,7 @@ package com.android.battlenoleproject;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -21,7 +22,6 @@ import java.util.Random;
 public class SetupActivity extends Activity {
 
     protected static final int NO_FIELD_IS_AIMED = -1;
-    private static final Random r = new Random();
 
     protected ImageAdapter imageAdapter;
     protected GridView boardGrid;
@@ -33,8 +33,8 @@ public class SetupActivity extends Activity {
     protected Button buttonRotate;
     protected Button buttonStart;
 
-    protected Ship[] player1Ships;
-    protected Ship[] player2Ships;
+    protected Ship[] playerShips;
+    protected Ship[] enemyShips;
 
     private static final String TAG = SetupActivity.class.getSimpleName();
 
@@ -42,7 +42,9 @@ public class SetupActivity extends Activity {
 
     private int clickedShipNumber, lastClickedShipNumber;
 
-    boolean playComputer = true;
+    private boolean playComputer;
+
+    private int playerSetting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +52,19 @@ public class SetupActivity extends Activity {
 
         Intent intent = getIntent();
         playComputer = intent.getBooleanExtra("playComputer", true);
+        playerSetting = intent.getIntExtra("playerSetting", 2);
 
         lastClickWasShip = false;
         clickedShipNumber = -1;
         lastClickedShipNumber = 0;
 
 
-        player1Ships = new Ship[4];
+        playerShips = new Ship[4];
         for (int i = 0; i < 4; ++i) {
-            player1Ships[i] = new Ship(i + 2);
+            playerShips[i] = new Ship(i + 2);
         }
 
-        randomizeShips(player1Ships);
-
+        randomizeShips(playerShips);
 
         displaySetupScreen();
         attachActionListeners();
@@ -78,7 +80,7 @@ public class SetupActivity extends Activity {
 
         boardGrid = (GridView) findViewById(R.id.setup_gridview);
 
-        imageAdapter = new ImageAdapter(this, this.player1Ships);
+        imageAdapter = new ImageAdapter(this, this.playerShips);
         boardGrid.setAdapter(imageAdapter);
 
         // Stop annoying default activity transition
@@ -110,12 +112,12 @@ public class SetupActivity extends Activity {
 
                 //Toast.makeText(getApplicationContext(), "Redeploy ships", Toast.LENGTH_LONG).show();
                 // Create new randomization and update view
-                randomizeShips(player1Ships);
+                randomizeShips(playerShips);
                 imageAdapter.notifyDataSetChanged();
 
                 //disable game start and re-enable rotate if necessary
                 buttonStart.setEnabled(false);
-                buttonRotate.setEnabled(false);
+                buttonRotate.setEnabled(true);
             }
         });
 
@@ -138,7 +140,7 @@ public class SetupActivity extends Activity {
             @Override
             public void onClick(View v) {
                 buttonRotate.setEnabled(false);
-                player1Ready();
+                playerReady();
             }
         });
 
@@ -160,9 +162,9 @@ public class SetupActivity extends Activity {
                     if (lastClickWasShip) {  // If a Ship was previous ImageView clicked
                         // we know the ship number that was clicked. We now know board position clicked
                         boolean valid = true;
-                        for (int i = 0; i < player1Ships.length; ++i) {
+                        for (int i = 0; i < playerShips.length; ++i) {
                             if (i != lastClickedShipNumber) {
-                                valid = shipNoConflicts(player1Ships[lastClickedShipNumber].getDirection(), position, player1Ships[lastClickedShipNumber].getLength(), player1Ships[i].getCoordinates());
+                                valid = shipNoConflicts(playerShips[lastClickedShipNumber].getDirection(), position, playerShips[lastClickedShipNumber].getLength(), playerShips[i].getCoordinates());
                                 if (valid == false)
                                     break;
 
@@ -170,8 +172,8 @@ public class SetupActivity extends Activity {
                         }
 
                         if (valid == true) {
-                            if (shipWillFit(player1Ships[lastClickedShipNumber].getDirection(), position,
-                                    player1Ships[lastClickedShipNumber].getLength())) {
+                            if (shipWillFit(playerShips[lastClickedShipNumber].getDirection(), position,
+                                    playerShips[lastClickedShipNumber].getLength())) {
 
                                 redrawShip(position, lastClickedShipNumber);
 
@@ -201,29 +203,60 @@ public class SetupActivity extends Activity {
 
     }
 
-    private void player1Ready() {
+    private void playerReady() {
 
-        if (false){//playComputer == false) {
+        if (playComputer == false){
 
-            // look for connection via bluetooth
-            // must negotiate who is server and who is client
+            if (playerSetting == 1)
+            {
+                Intent intent = new Intent(this.getApplicationContext(), WaitingRoom.class);
+
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArray("player1Ships", playerShips);
+                intent.putExtras(bundle);
+                startActivity(intent);
+                finish();
+            }
+            if (playerSetting == 2)
+            {
+                Bundle bundle = getIntent().getExtras();
+
+                Parcelable ps1[] = bundle.getParcelableArray("player1Ships");
+                getIntent().removeExtra("player1Ships");
+
+                enemyShips = new Ship[ps1.length];
+                System.arraycopy(ps1, 0, enemyShips, 0, ps1.length);
+
+                getIntent().removeExtra("player1Ships");
+
+                Intent intent = new Intent(this.getApplicationContext(), OtherPlayer.class);
+
+                bundle.putParcelableArray("player1Ships", enemyShips);
+                bundle.putParcelableArray("player2Ships", playerShips);
+                intent.putExtras(bundle);
+                //intent = new Intent(this.getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
 
         }
         else {   // play Computer is true. Create a random ship for computer.
 
-            player2Ships = new Ship[4];
+            enemyShips = new Ship[4];
             for (int i = 0; i < 4; ++i) {
-                player2Ships[i] = new Ship(i + 2);
+                enemyShips[i] = new Ship(i + 2);
             }
 
-            randomizeShips(player2Ships);
+            randomizeShips(enemyShips);
 
-            Intent intent = new Intent(this.getApplicationContext(), Game.class);
+            Intent intent = new Intent(this.getApplicationContext(), PlayComputerActivity.class);
+
             Bundle bundle = new Bundle();
-            bundle.putSerializable("player1Ships", player1Ships);
-            bundle.putSerializable("player2Ships", player2Ships);
+            bundle.putParcelableArray("player1Ships", playerShips);
+            bundle.putParcelableArray("player2Ships", enemyShips);
             intent.putExtras(bundle);
             startActivity(intent);
+            finish();
 
         }
 
@@ -231,6 +264,8 @@ public class SetupActivity extends Activity {
     }
 
     public void randomizeShips(Ship[] ships) {
+
+        Random r = new Random();
 
         for (int shipCount = 0; shipCount < ships.length; ++shipCount)
             ships[shipCount].clearCoordinates();
@@ -245,8 +280,11 @@ public class SetupActivity extends Activity {
                 if (shipWillFit(direction, randomStartPosition, ships[shipCount].getLength())) {
                     valid = true;
                     if (shipCount > 0) {
-                        for (int i = shipCount - 1; i > 0; --i) {
-                            valid = shipNoConflicts(direction, randomStartPosition, ships[i].getLength(), ships[i].getCoordinates());
+                        for (int i = 0; i < ships.length; ++i)
+                        {
+                            if (i == shipCount)
+                                continue;
+                            valid = shipNoConflicts(direction, randomStartPosition, ships[shipCount].getLength(), ships[i].getCoordinates());  // 7-25 PM updates
                             if (valid == false)
                                 break;
                         }
@@ -283,7 +321,7 @@ public class SetupActivity extends Activity {
         boolean valid = true;
 // if direction is horizontal, have to check in loop for startPosition + checkedShipped length -1
         if (direction == 0) {
-            for (int i = startPosition; i < startPosition + length + 1; ++i) {
+            for (int i = startPosition; i < startPosition + length; ++i) {
                 if (coordinates.contains(i)) {  // horizontal
                     valid = false;
                     break;
@@ -321,10 +359,10 @@ public class SetupActivity extends Activity {
     public int isShip(int position) {
         int shipNumber = -1;
 
-        for (int shipCount = 0; shipCount < player1Ships.length; ++shipCount) {
+        for (int shipCount = 0; shipCount < playerShips.length; ++shipCount) {
 
-            ArrayList<Integer> coordinates = new ArrayList<>(this.player1Ships[shipCount].getLength());
-            coordinates = this.player1Ships[shipCount].getCoordinates();
+            ArrayList<Integer> coordinates = new ArrayList<>(this.playerShips[shipCount].getLength());
+            coordinates = this.playerShips[shipCount].getCoordinates();
 
             if (coordinates.indexOf(position) != -1) {
                 shipNumber = shipCount;
@@ -338,7 +376,7 @@ public class SetupActivity extends Activity {
 
     public void rotateShip(int shipNumber) {
         boolean valid = true;
-        int oldDirection = this.player1Ships[shipNumber].getDirection();
+        int oldDirection = this.playerShips[shipNumber].getDirection();
         int newDirection;
         if (oldDirection == 0)
             newDirection = 1;
@@ -349,14 +387,14 @@ public class SetupActivity extends Activity {
         for (int i = 0; i < 2; ++i) {   // take current startPosition and try adding from 0 to 2 to see if it will rotate
 
 
-            if (shipWillFit(newDirection, this.player1Ships[shipNumber].getStartPosition() + i,
-                    this.player1Ships[shipNumber].getLength())) {
+            if (shipWillFit(newDirection, this.playerShips[shipNumber].getStartPosition() + i,
+                    this.playerShips[shipNumber].getLength())) {
 
-                for (int j = 0; j < player1Ships.length; ++j) {   // if it will fit at startPosition + i
+                for (int j = 0; j < playerShips.length; ++j) {   // if it will fit at startPosition + i
 
                     if (j != shipNumber) {  // Do not check the ship you are trying to rotate
-                        valid = shipNoConflicts(newDirection, this.player1Ships[shipNumber].getStartPosition() + i,
-                                this.player1Ships[shipNumber].getLength(), this.player1Ships[j].getCoordinates());
+                        valid = shipNoConflicts(newDirection, this.playerShips[shipNumber].getStartPosition() + i,
+                                this.playerShips[shipNumber].getLength(), this.playerShips[j].getCoordinates());
                         if (valid == false) {
 
                             break;
@@ -366,8 +404,8 @@ public class SetupActivity extends Activity {
 
                 if (valid == true) {
 
-                    this.player1Ships[shipNumber].setDirection(newDirection);
-                    redrawShip(this.player1Ships[shipNumber].getStartPosition(), shipNumber);
+                    this.playerShips[shipNumber].setDirection(newDirection);
+                    redrawShip(this.playerShips[shipNumber].getStartPosition(), shipNumber);
                     break;
                 }
 
@@ -385,26 +423,26 @@ public class SetupActivity extends Activity {
 
         int imageResource = R.drawable.white;
 
-        ArrayList<Integer> oldCoordinates = new ArrayList<>(this.player1Ships[shipNumber].getLength());
+        ArrayList<Integer> oldCoordinates = new ArrayList<>(this.playerShips[shipNumber].getLength());
 
-        ArrayList<Integer> newCoordinates = new ArrayList<>(this.player1Ships[shipNumber].getLength());
+        ArrayList<Integer> newCoordinates = new ArrayList<>(this.playerShips[shipNumber].getLength());
 
-        oldCoordinates = this.player1Ships[shipNumber].getCoordinates();
+        oldCoordinates = this.playerShips[shipNumber].getCoordinates();
 
-        if (player1Ships[shipNumber].getDirection() == 0) {
+        if (playerShips[shipNumber].getDirection() == 0) {
 
-            for (int i = 0; i < player1Ships[shipNumber].getLength(); ++i) {
+            for (int i = 0; i < playerShips[shipNumber].getLength(); ++i) {
                 newCoordinates.add(position + i);
             }
 
         } else {
-            for (int i = 0; i < player1Ships[shipNumber].getLength(); ++i) {
+            for (int i = 0; i < playerShips[shipNumber].getLength(); ++i) {
                 newCoordinates.add(position + (i * 10));
             }
 
         }
 
-        player1Ships[shipNumber].setCoordinates(newCoordinates);
+        playerShips[shipNumber].setCoordinates(newCoordinates);
 
 
         imageAdapter.notifyDataSetChanged();

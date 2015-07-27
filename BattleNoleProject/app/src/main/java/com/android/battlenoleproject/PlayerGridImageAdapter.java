@@ -1,16 +1,16 @@
-package com.android.battlenoleproject;
-
-/**
+package com.android.battlenoleproject; /**
  * Created by srandall on 7/12/15.
  */
-
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-
+import  android.os.Handler;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -18,13 +18,9 @@ public class PlayerGridImageAdapter extends BaseAdapter {
 
     private static final String TAG = SetupActivity.class.getSimpleName();
 
-    private static Ship[] fleet;
-
-    private static GameFactory game;
+    private Board board;
 
     private int playerNumber, enemyNumber;
-
-    private static ArrayList<Integer> board;
 
     private static final Random r = new Random();
 
@@ -54,12 +50,18 @@ public class PlayerGridImageAdapter extends BaseAdapter {
     };
 
 
-    public PlayerGridImageAdapter(Context c, GameFactory sentGame, int player) {
+    public PlayerGridImageAdapter(Context c, Board sentBoard, int player ) {
 
-        game = new GameFactory(sentGame);
+        board = new Board(sentBoard);
         this.playerNumber = player;
+        this.enemyNumber = Game.getOpposite(player);
 
-        this.enemyNumber = game.getOpposite(player);
+        mContext = c;
+    }
+
+    public void swapBoards(Board newBoard) {
+        this.board = newBoard;
+        notifyDataSetChanged();
     }
 
 
@@ -77,7 +79,7 @@ public class PlayerGridImageAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-        SquareImageView imageView;
+        final SquareImageView imageView;
         if (convertView == null) {  // if it's not recycled, initialize some attributes
             imageView = new SquareImageView(mContext);
             imageView.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -92,6 +94,7 @@ public class PlayerGridImageAdapter extends BaseAdapter {
         imageView.setImageResource(0);
         imageView.setImageDrawable(null);
         imageView.setImageResource(getImageResource(position));
+
 
         boardFields[position] = imageView;
         return imageView;
@@ -119,7 +122,7 @@ public class PlayerGridImageAdapter extends BaseAdapter {
     public int getImageResource(int position) {
 
         int imageResource = R.drawable.white;
-        int boardValue = game.getBoardCellValueByPlayer(this.playerNumber, position);
+        int boardValue = board.getElementAtBoardPosition(position);
 
         if (boardValue < 50) {
 
@@ -154,7 +157,7 @@ public class PlayerGridImageAdapter extends BaseAdapter {
 
 
         if (boardValue == FIRE_MISS) { /// this is fire hit or miss
-            imageResource = R.drawable.black;
+            imageResource = R.drawable.miss;
         }
 
         else if(boardValue == FIRE_HIT)
@@ -169,10 +172,16 @@ public class PlayerGridImageAdapter extends BaseAdapter {
     }
 
     protected boolean checkIfHorizontal( int position) {
+
+
         boolean isHorizontal = false;
-        int firstValue = game.getBoardCellValueByPlayer(this.playerNumber, position);
-        int plusOneValue = game.getBoardCellValueByPlayer(this.playerNumber, position + 1);
-        int minusOneValue = game.getBoardCellValueByPlayer(this.playerNumber, position - 1);
+        int plusOneValue = position;
+        int minusOneValue = position;
+        int firstValue = board.getElementAtBoardPosition(position);
+        if (position < 99)
+            plusOneValue = board.getElementAtBoardPosition(position + 1);
+        if (minusOneValue > 0)
+            minusOneValue = board.getElementAtBoardPosition(position - 1);
 
         if (plusOneValue - firstValue == 1 | firstValue - minusOneValue == 1| plusOneValue == FIRE_HIT | minusOneValue == FIRE_HIT)
             isHorizontal = true;

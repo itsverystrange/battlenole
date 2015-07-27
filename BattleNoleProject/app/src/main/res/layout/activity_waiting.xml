@@ -1,0 +1,103 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/black"
+    tools:context="com.android.battleship.WaitingRoom">
+
+    <!-- Header -->
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@drawable/grid_blue"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp">
+
+        <TextView
+            android:id="@+id/headerTextView"
+            style="@style/messages"
+            android:text="@string/waiting_for_player"
+            />
+    </LinearLayout>
+    <!-- End Header -->
+
+    <!-- Grid -->
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/radar"
+        >
+
+        <TextView
+            android:id="@+id/setup_gridview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.8"
+            android:background="@drawable/ocean"
+            android:gravity="center"
+            android:horizontalSpacing="1dp"
+            android:numColumns="10"
+            android:stretchMode="columnWidth"
+            android:text="Next Player's Turn! Press ok to continue"
+            android:textSize="50dip"
+            style="@style/messages">
+        </TextView>
+
+    </FrameLayout>
+    <!-- End Grid -->
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/grid_blue"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/btnGo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:src="@drawable/ic_btn_ok"
+                android:layout_gravity="bottom"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="3"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/btnBackText"
+                style="@style/btnLabel"
+                android:text="Ok"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+    <!-- End Footer -->
+
+
+</LinearLayout>

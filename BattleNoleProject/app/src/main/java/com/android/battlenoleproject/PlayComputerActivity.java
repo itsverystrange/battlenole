@@ -1,217 +1,339 @@
 package com.android.battlenoleproject;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 
-public class PlayComputerActivity extends Activity {
-
-    private ImageButton mMyShips;
-    private Button mFire;
-    private TextView mHeader;
+public class PlayComputerActivity extends Activity
+    implements com.android.battlenoleproject.EnemyBoardFragment.OnFragmentFireInteractionListener,
+        com.android.battlenoleproject.EnemyBoardFragment.OnEnemyFragmentContinueInteractionListener,
+        PlayerBoardFragment.OnPlayerFragmentContinueInteractionListener{
 
     Ship[] player1Ships, computerShips;
     int player1, computer, playerTurn;
 
-    GameFactory game;
+    Game game;
 
-    GridView playerBoardGrid;
-    GridView computerBoardGrid;
-    EnemyGridImageAdapter enemyImageAdapter;
-    PlayerGridImageAdapter playerImageAdapter;
+    private final static int ENEMY_PLAYER_NUMBER = 1;
+    private final static int PLAYER_PLAYER_NUMBER = 0;
+
+    private final static int FIRE_MISS = 61;
+    private final static int FIRE_HIT = 62;
+    private final static int FIRE_DESTROY_SHIP = 71;
+    private final static int FIRE_DESTROY_FLEET = 72;
+    private final static int FIRE_BAD_FIRE = 73;
+
+    private static final String BOARD_KEY = "board";
 
     private Handler myHandler = new Handler();
 
     private static final Random r = new Random();
 
-    TextView directionsTextView, resultsTextView;
+    protected int random;
+
+    private int lastEnemyHit;
+
+    private TextView topTV;
+
+    private ImageView submarine;
+    private ImageView smallShip;
+    private ImageView destroyer;
+    private ImageView aircraftCarrier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_game);
 
         Bundle bundle = getIntent().getExtras();
 
-        player1Ships = (Ship[])bundle.getSerializable("player1Ships");
-        computerShips = (Ship[])bundle.getSerializable("player2Ships");
+        Parcelable ps1[] = bundle.getParcelableArray("player1Ships");
+        Parcelable ps2[] = bundle.getParcelableArray("player1Ships");
 
-        game = new GameFactory(player1Ships, computerShips);
-        player1 = 0;
-        computer = 1;
+        player1Ships = new Ship[ps1.length];
+        computerShips = new Ship[ps2.length];
 
-        playerTurn = 0;
+        System.arraycopy(ps1, 0, player1Ships, 0, ps1.length);
 
-        Log.d("TEST", "MADE IT PAST INTENT");
+        System.arraycopy(ps2, 0, computerShips, 0, ps1.length);
+
+        getIntent().removeExtra("player1Ships");
+        getIntent().removeExtra("player2Ships");
+
+
+        game = new Game(player1Ships, computerShips);
+        player1 = PLAYER_PLAYER_NUMBER;
+        computer = ENEMY_PLAYER_NUMBER;
+
+        playerTurn = 0;  // changed this to test, needs to be 0
+
+
+        topTV = (TextView) findViewById(R.id.play_tv1);
+
+        submarine = (ImageView) findViewById(R.id.submarine);
+        smallShip = (ImageView) findViewById(R.id.small_ship);
+        destroyer = (ImageView) findViewById(R.id.destroyer);
+        aircraftCarrier = (ImageView) findViewById(R.id.aircraft_carrier);
 
         playGame();
 
-        // Stop annoying default activity transition
-        getWindow().setWindowAnimations(0);
+    }
 
-        mHeader = (TextView) findViewById(R.id.headerTextView);
-        mMyShips = (ImageButton) findViewById(R.id.myShips);
-        mFire = (Button) findViewById(R.id.fire);
+    @Override
+    public void onFragmentFireInteraction(int position) {
 
-        mHeader.setText("Select a target");  // This will change based on the number of ships each player has available.
-
-        mMyShips.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewMyShips();
-            }
-        });
-
-        mFire.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fire();
-            }
-        });
-
+        processPlayerFire(position);
 
     }
 
-    private void viewMyShips() {
-        Intent intent = new Intent(this, com.android.battlenoleproject.MyShips.class);
-        startActivity(intent);
+    @Override
+    public void onPlayerFragmentContinueInteraction() {
+
+        playGame();
+
     }
+
+    @Override
+    public void onEnemyFragmentContinueInteraction() {
+
+        playGame();
+
+    }
+
 
     protected void displayArrangeGameScreen(int playerTurn){
-        setContentView(R.layout.activity_play_computer);
-
-        directionsTextView = (TextView) findViewById(R.id.play_tv1);
-        resultsTextView = (TextView) findViewById(R.id.play_tv2);
-        playerBoardGrid = (GridView) findViewById(R.id.setup_gridview);
-        computerBoardGrid = (GridView) findViewById(R.id.setup_gridview);
 
 
-        if (playerTurn == 0) {
-            enemyImageAdapter = new EnemyGridImageAdapter(this, this.game, this.playerTurn);  // display grid without ships, just misses and hits
-            computerBoardGrid.setAdapter(enemyImageAdapter);
+        if (playerTurn == ENEMY_PLAYER_NUMBER) {
+
+            topTV.setText("Enemy is Firing!");
+
+            Board playerBoard = new Board(game.getPlayerBoard(PLAYER_PLAYER_NUMBER));
+
+            PlayerBoardFragment playerFragment = PlayerBoardFragment.newInstance(playerBoard);
+
+
+            EnemyBoardFragment enemyBoardFragment = new EnemyBoardFragment();
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            Context context = getApplicationContext();
+            enemyBoardFragment =  (EnemyBoardFragment) fragmentManager.findFragmentByTag("enemyBoard");
+
+            if (enemyBoardFragment != null)
+                fragmentTransaction.remove(enemyBoardFragment);
+
+
+
+            ViewGroup mainContainer = (ViewGroup) findViewById(R.id.grid_holder);
+
+
+            fragmentTransaction.replace(mainContainer.getId(), playerFragment, "playerBoard");
+            //fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            fragmentTransaction.commit();
+            fragmentManager.executePendingTransactions();
+
         }
-        else {  // it is the computer turn, use PlayerImageAdapter to display own grid with ships
 
-            playerImageAdapter = new PlayerGridImageAdapter(this, this.game, this.playerTurn);
-            playerBoardGrid.setAdapter(playerImageAdapter);
+        else {
+
+            topTV.setText("Pick a cell to fire on");
+
+            Board enemyBoard = new Board(game.getPlayerBoard(ENEMY_PLAYER_NUMBER));
+
+            EnemyBoardFragment enemyFragment = EnemyBoardFragment.newInstance(enemyBoard);
+
+            PlayerBoardFragment playerBoardFragment = new PlayerBoardFragment();
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            Context context = getApplicationContext();
+            playerBoardFragment =  (PlayerBoardFragment) fragmentManager.findFragmentByTag("playerBoard");
+
+            if (playerBoardFragment != null)
+                fragmentTransaction.remove(playerBoardFragment);
+
+
+            ViewGroup mainContainer = (ViewGroup) findViewById(R.id.grid_holder);
+
+
+            fragmentTransaction.replace(mainContainer.getId(), enemyFragment, "enemyBoard");
+           // fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            fragmentTransaction.commit();
+            fragmentManager.executePendingTransactions();
+
         }
-    }
 
-
-    private void attachActionListeners(){
-
-
-
-        //boardGame GridView listener sets the aimedField property and changes aim color
-        computerBoardGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                ImageView iv = (ImageView) v;
-
-                fire(position);
-
-
-
-
-            }
-        });
 
     }
-
 
 
     public void playGame() {
 
+            if (playerTurn == -1)
+                return;
 
-            if (playerTurn == 0) {
+
+            if (playerTurn == 0) {                          // It is Player's turn show enemy board
                 displayArrangeGameScreen(playerTurn);
-                directionsTextView.setText("Player 1, pick a cell to fire upon");
-                attachActionListeners();
-                Log.d("TEST", "ADDED ACTION LISTENERS");
             }
 
-            else {
+            else {                                        // It is enemy's turn show player's board
                 displayArrangeGameScreen(playerTurn);
-                int random = 0;
-                while (game.getPlayerBoard(0).get(random) > 9 )
+                while (game.getPlayerBoard(0).getElementAtBoardPosition(random) >= FIRE_MISS )  //  (don't select a cell that we have already hit
                     random = r.nextInt(99);
-                myHandler.postDelayed(displayTurnResults, 1000);
-                Log.d("TEST", "IS COMPUTER FIRING?");
-                fire(random);
 
+                Handler handler = new Handler();       // delay here to show screen and then show fire position
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                            processEnemyFire(random);
+
+                    }
+                }, 2000);
 
             }
-
-
 
     }
 
 
-    public void fire(int position) {
+    public void processPlayerFire(int position) {
 
-        Log.d("TEST", "A FIRE OCCURRED");
 
         int result = this.game.processMove(playerTurn, position);
 
-        Log.d("TEST_BATTLESHIP", "RESULT IS" + result);
+        if (result == FIRE_BAD_FIRE) {
+            topTV.setText("Cell already Selected. Please pick again");
+            return;
+        } else {
 
-        enemyImageAdapter.notifyDataSetChanged();
+            EnemyBoardFragment enemyBoardFragment = new EnemyBoardFragment();
 
-        ArrayList<Integer> boardContents = new ArrayList<>();
-        boardContents = game.getPlayerBoard(game.getOpposite(playerTurn));
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            Context context = getApplicationContext();
+            enemyBoardFragment = (EnemyBoardFragment) fragmentManager.findFragmentByTag("enemyBoard");
+            enemyBoardFragment.fire(position, result);
 
-        Log.d("TEST_BATTLESHIP", "Board Grid is" + boardContents.toString());
+
+            if (result == FIRE_MISS) { // it was a miss, switch turns
+                topTV.setText("Sorry, you missed. Switching to Enemy Turn.");
+                playerTurn = Game.getOpposite(playerTurn);
+            } else if (result == FIRE_HIT) {
+                topTV.setText("You Hit the Enemy! Go Again.");
+            } else if (result%FIRE_DESTROY_SHIP == 0) {
+                topTV.setText("You Destroyed an Enemy Ship! Go Again.");
+                int shipNumber = result / FIRE_DESTROY_SHIP - 1;
+                switch(shipNumber)
+                {
+                    case 0:
+                        smallShip.setImageDrawable(null);
+                        break;
+                    case 1:
+                        submarine.setImageDrawable(null);
+                        break;
+                    case 2:
+                        destroyer.setImageDrawable(null);
+                        break;
+                    case 3:
+                        aircraftCarrier.setImageDrawable(null);
+                        break;
+                    default:
+                        //should never get here
+
+                }
 
 
-        myHandler.postDelayed(displayTurnResults, 100);
 
-        if (result > 4)  // it was a miss, switch turns
-            playerTurn = game.getOpposite(playerTurn);
-        else {
-            if (!game.fleetStillAlive(playerTurn))
+
+            } else if (result == FIRE_DESTROY_FLEET) {
+                topTV.setText("YOU WIN!!!!!!!!!");
                 processWinner(playerTurn);
+            }
+
+
+            myHandler.postDelayed(changePlayers, 1000);
+
+        }
+    }
+
+
+    public void processEnemyFire(int position) {
+
+
+        int result = this.game.processMove(playerTurn, position);
+
+
+        PlayerBoardFragment playerBoardFragment = new PlayerBoardFragment();
+
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        Context context = getApplicationContext();
+        playerBoardFragment =  (PlayerBoardFragment) fragmentManager.findFragmentByTag("playerBoard");
+        playerBoardFragment.fire(position, result);
+
+
+
+
+        if (result == FIRE_MISS) { // it was a miss, switch turns
+            topTV.setText("Sorry, you missed. Switching to Enemy Turn.");
+            playerTurn = Game.getOpposite(playerTurn);
+        }
+        else if (result == FIRE_HIT) {
+            topTV.setText("You Hit the Enemy! Go Again.");
+        }
+        else if (result == FIRE_DESTROY_SHIP) {
+            topTV.setText("Enemy Destroyed Your Ship! Go Again.");
+        }
+        else if (result == FIRE_DESTROY_FLEET) {
+            topTV.setText("ENEMY WINS!!!!!!!!!");
+            processWinner(playerTurn);
         }
 
-        Log.d("TEST_BATTLESHIP", "After Switching Turns, next Turn is" + playerTurn);
 
-        playGame();
-
+        myHandler.postDelayed(changePlayers, 2000);
 
     }
 
 
     public void processWinner(int playerNumber) {
-
+        int playerCheck = playerNumber;
+        playerTurn = -1;
+        Intent endGame = new Intent(this, EndGame.class);
+        Boolean won = true;
+        if (playerCheck == ENEMY_PLAYER_NUMBER)
+            won = false;
+        endGame.putExtra("winner", won);
+        startActivity(endGame);
     }
 
 
-    private Runnable displayTurnResults = new Runnable() {
+    private Runnable changePlayers = new Runnable() {
+        @Override
         public void run() {
-
-            if (playerTurn == 0)
-                resultsTextView.setText("Player1 Results");
-            else
-                resultsTextView.setText("Computer Results");
-            myHandler.postDelayed(this, 100);
-            }
-
+      /* do what you need to do */
+            playGame();
+      /* and here comes the "trick" */
+            // myHandler.postDelayed(this, 100);
+        }
     };
 
 
-    private void fire() {
-        Toast.makeText(this, "Fire torpedoes", Toast.LENGTH_LONG).show();
-    }
 }

@@ -13,7 +13,15 @@ public class Info {
 
         mPages[0] = new Page(
                 "Rules of Engagement",
-                "1. Lorem ipsum dolor\n2. Lorem ipsum dolor\n3. Lorem ipsum dolor\n4. Lorem ipsum dolor");
+                "1. When the game launches, you can either choose to play against the computer or " +
+                        "play against an opponent via pass 'n' play.\n" +
+                        "2. Start by positioning your ships.  This is accomplished by clicking " +
+                        "where you want the boats or having them randomly placed. " +
+                        "You can click redeploy to reposition the boats randomly. " +
+                        "Lock them in and begin.\n" +
+                        "3. Each player fires one torpedo per turn. An additional torpedo is" +
+                        " gained when an enemy boat is hit. \n" +
+                        "4.First player to sink all of his/her opponent’s ships wins!");
 
         mPages[1] = new Page(
                 "Team Froyo",

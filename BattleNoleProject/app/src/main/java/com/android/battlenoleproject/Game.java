@@ -1,218 +1,281 @@
 package com.android.battlenoleproject;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
+/**
+ * Created by srandall on 7/19/15.
+ */
+
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.List;
 
 
-public class Game extends Activity {
+public class Game {
 
-    private ImageButton mMyShips;
-    private Button mFire;
-    private TextView mHeader;
+    private List<Board> boards;
+    private List<ArrayList<Integer>> destroyedShips;
 
-    Ship[] player1Ships, computerShips;
-    int player1, computer, playerTurn;
+    private final static int BOARD_SIZE = 100;
+    private final static int SHIP_COUNT = 4;
 
-    Boolean finished = false;
-    Boolean newTurn = true;
+    private final static Integer WATER = 59;
+    private final static int FIRE_MISS = 61;
+    private final static int FIRE_HIT = 62;
+    private final static int FIRE_DESTROY_SHIP = 71;
+    private final static int FIRE_DESTROY_FLEET = 72;
+    private final static int FIRE_BAD_FIRE = 73;
 
-    GameFactory myGameFactory;
+    private final static int PLAYER_PLAYER_NUMBER = 0;
+    private final static int ENEMY_PLAYER_NUMBER = 1;
 
-    GridView playerBoardGrid;
-    GridView computerBoardGrid;
-    PlayerGridImageAdapter playerImageAdapter;
-    EnemyGridImageAdapter enemyImageAdapter;
+    private final static int PLAYER_COUNT = 2;
 
-    private Handler myHandler = new Handler();
 
-    private static final Random r = new Random();
+    public Game( Ship[] playerOneShips, Ship[] playerTwoShips) {
 
-    TextView directionsTextView, resultsTextView;
+        createBoards(playerOneShips, playerTwoShips);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game);
+        ArrayList<Integer> player1Destroyed = new ArrayList<>();
+        ArrayList<Integer> player2Destroyed = new ArrayList<>();
 
-        Bundle bundle = getIntent().getExtras();
+        this.destroyedShips = new ArrayList<>();
 
-        player1Ships = (Ship[])bundle.getSerializable("player1Ships");
-        computerShips = (Ship[])bundle.getSerializable("player2Ships");
+        this.destroyedShips = new ArrayList<ArrayList<Integer>>(PLAYER_COUNT);
+        this.destroyedShips.add(PLAYER_PLAYER_NUMBER, player1Destroyed);
+        this.destroyedShips.add(ENEMY_PLAYER_NUMBER, player2Destroyed);
 
-        myGameFactory = new GameFactory(player1Ships, computerShips);
-        player1 = 0;
-        computer = 1;
+    }
 
-        playerTurn = 0;
+    public Game (Game sentGame) {
 
-        Log.d("TEST", "MADE IT PAST INTENT");
+        Board  board0 = new Board(sentGame.getPlayerBoard(PLAYER_PLAYER_NUMBER));
+        Board  board1 = new Board(sentGame.getPlayerBoard(ENEMY_PLAYER_NUMBER));
 
-        playGame();
+        this.boards = new ArrayList<Board>(PLAYER_COUNT);
+        this.boards.add(board0);
+        this.boards.add(board1);
 
-        // Stop annoying default activity transition
-        getWindow().setWindowAnimations(0);
+        this.destroyedShips = new ArrayList<ArrayList<Integer>>(PLAYER_COUNT);
 
-        mHeader = (TextView) findViewById(R.id.headerTextView);
-        mMyShips = (ImageButton) findViewById(R.id.myShips);
-        mFire = (Button) findViewById(R.id.fire);
+        for (int i = 0; i < PLAYER_COUNT; ++i) {
 
-        mHeader.setText("Select a target");  // This will change based on the number of ships each player has available.
-/*
-        mMyShips.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewMyShips();
+            if (sentGame.destroyedShips.get(PLAYER_PLAYER_NUMBER).size() > 0) {
+                this.destroyedShips.add(i, sentGame.destroyedShips.get(PLAYER_PLAYER_NUMBER));
+            } else {
+                ArrayList<Integer> playerDestroyed = new ArrayList<>();
+                this.destroyedShips.add(i, playerDestroyed);
             }
-        });
+        }
 
-        mFire.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fire();
-            }
-        });
+    }
+
+/* LEAVING HERE JUST IN CASE WE NEED TO PARCEL GAME LATER
+    public void writeToParcel ( Parcel out, int flags) {
+        out.writeTypedList(boards);
+        out.write
+    }
+
+    public Game (Parcel in) {
+        this.boards = new ArrayList<Board>(2);
+        this.destroyedShips = new ArrayList<ArrayList<Integer>>(2);
+        in.readTypedList(boards, Board.CREATOR);
+        in.readList(destroyedShips, Integer.class.getClassLoader());
+    }
+
+    public int describeContents() {
+        return this.hashCode();
+    }
+
+
+    public static final Parcelable.Creator<Game> CREATOR =
+            new Parcelable.Creator<Game>() {
+                public Game createFromParcel(Parcel in) {
+                    return new Game(in);
+                }
+
+                public Game[] newArray(int size) {
+                    return new Game[size];
+                }
+            };
 
 */
+    public boolean isGameOver() {
+        boolean gameOver = true;
+
+
+        return gameOver;
     }
 
 
 
-    private void viewMyShips() {
-        Intent intent = new Intent(this, com.android.battlenoleproject.MyShips.class);
-        startActivity(intent);
-    }
+    private void createBoards(Ship[] player1Ships, Ship[] player2Ships) {
+        Board  board0 = new Board();
+        Board  board1 = new Board();
 
-    protected void displayArrangeGameScreen(int playerTurn){
-        setContentView(R.layout.activity_game);
+        int size = board0.getBoardSize();
 
-        directionsTextView = (TextView) findViewById(R.id.play_tv1);
-        resultsTextView = (TextView) findViewById(R.id.play_tv2);
-        playerBoardGrid = (GridView) findViewById(R.id.setup_gridview);
-        computerBoardGrid = (GridView) findViewById(R.id.setup_gridview);
+        Log.d("TEST", "BOARD0 SIZE IS " + size);
 
 
-        if (playerTurn == 0) {
-            enemyImageAdapter = new EnemyGridImageAdapter(this, this.myGameFactory, this.playerTurn);  // display grid without ships, just misses and hits
-            computerBoardGrid.setAdapter(enemyImageAdapter);
+        for (int i = 0; i < BOARD_SIZE; ++i) {
+            board0.addElement(WATER);
+            board1.addElement(WATER);
         }
-        else {  // it is the computer turn, use PlayerImageAdapter to display own grid with ships
 
-            playerImageAdapter = new PlayerGridImageAdapter(this, this.myGameFactory, this.playerTurn);
-            playerBoardGrid.setAdapter(playerImageAdapter);
+        for (int j = 0; j < SHIP_COUNT; ++j) {
+
+            ArrayList<Integer>  player1ShipCoordinates = new ArrayList<Integer>(player1Ships[j].getLength());
+            player1ShipCoordinates.addAll(player1Ships[j].getCoordinates());
+
+            ArrayList<Integer>  player2ShipCoordinates = new ArrayList<Integer>(player2Ships[j].getLength());
+            player2ShipCoordinates.addAll(player2Ships[j].getCoordinates());
+
+            for (int k = 0; k < player1Ships[j].getLength(); ++k )
+                board0.setElementAtBoardPosition(player1ShipCoordinates.get(k), j*10+k);
+
+            for (int k = 0; k < player2Ships[j].getLength(); ++k )
+                board1.setElementAtBoardPosition(player2ShipCoordinates.get(k), j*10+k);
+
         }
+
+
+        this.boards = new ArrayList<Board>(PLAYER_COUNT);
+        this.boards.add(board0);
+        this.boards.add(board1);
+
+    }
+
+    public Board getPlayerBoard(int playernumber) {
+
+        return this.boards.get(playernumber);
+
+    }
+/*
+    public ArrayList<Integer> getPlayerDestroyedShips(int playernumber) {
+        ArrayList<Integer>  newDestroyedShips = new ArrayList<Integer>(SHIP_COUNT);
+        newDestroyedShips.addAll(this.destroyedShips.get(playernumber));
+
+        return newDestroyedShips;
+    }
+
+*/
+    public void markBoardWithHit(int playerNumber, int position) {
+        this.boards.get(playerNumber).setElementAtBoardPosition(position, FIRE_HIT);
+    }
+
+    public void markBoardWithMiss(int playerNumber, int position) {
+        Log.d("TEST", "playerNumber SET TO " + playerNumber + "position SET  TO " + position);
+        this.boards.get(playerNumber).setElementAtBoardPosition(position, FIRE_MISS);  // 6 will mean a miss
     }
 
 
-    private void attachActionListeners(){
+    public int processMove(int attackingPlayer, int position) {
+
+        int attackedPlayer = getOpposite(attackingPlayer);
+        int positionResult = FIRE_MISS;
 
 
+        // check if this is position on any of attackedPlayers ships
 
-        //boardGame GridView listener sets the aimedField property and changes aim color
-        computerBoardGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                ImageView iv = (ImageView) v;
-                fire(position);
-                playGame(); // does opponent's turn
-                playGame(); // resets for player's turn
-                // returns control after opponent's turning awaiting another button press
+
+        Board boardGrid = new Board(this.boards.get(attackedPlayer));
+
+        int positionContains = boardGrid.getElementAtBoardPosition(position);
+
+        if (positionContains == FIRE_MISS || positionContains == FIRE_HIT)
+            return FIRE_BAD_FIRE;
+
+
+        if (positionContains < 50) {  // this is a hit
+
+            markBoardWithHit(attackedPlayer, position);  // 61 will mean a hit
+            positionResult = FIRE_HIT;
+
+            boolean shipAlive = shipStillAlive(attackedPlayer, positionContains);
+
+            if (shipAlive == false) {
+                int shipNumber = positionContains/10;
+                this.destroyedShips.get(attackedPlayer).add(shipNumber);
+                positionResult = FIRE_DESTROY_SHIP  * (shipNumber + 1);
+
+                // check the fleet
+
+                if (fleetStillAlive(attackedPlayer) == false) {
+                    positionResult = FIRE_DESTROY_FLEET;
+                }
             }
-        });
 
-    }
 
-    public void playGame() // runs through a single turn
-    {
-        //something is causing a garbage collection block...
-        if (playerTurn == 0)
-        {
-            displayArrangeGameScreen(playerTurn);
-            directionsTextView.setText("Player 1, pick a cell to fire upon");
-            attachActionListeners();
-            Log.d("TEST", "ADDED ACTION LISTENERS");
         }
-        else {
-            displayArrangeGameScreen(playerTurn);
-            int random = 0;
-            while (myGameFactory.getPlayerBoard(0).get(random) > 9)
-                random = r.nextInt(99);
-            myHandler.postDelayed(displayTurnResults, 1000);
-            Log.d("TEST", "IS COMPUTER FIRING?");
-            fire(random);
+
+
+        else { // it did not hit a ship, add board miss and return FIRE_MISS
+            markBoardWithMiss(attackedPlayer, position);
+            positionResult = FIRE_MISS;
+
         }
+
+        return positionResult;
     }
 
 
-    public void fire(int position) {
+    public static int getOpposite(int player) {
+        int returnPlayer = 0;
+        if (player == 0)
+            returnPlayer = 1;
+        else
+            returnPlayer = 0;
 
-        Log.d("TEST", "A FIRE OCCURRED");
+        return returnPlayer;
 
-        int result = this.myGameFactory.processMove(playerTurn, position);
+    }
 
-        Log.d("TEST_BATTLESHIP", "RESULT IS" + result);
+    public boolean fleetStillAlive(int playerNumber) {
+        boolean alive = true;
 
-        enemyImageAdapter.notifyDataSetChanged();
+        if (this.destroyedShips.get(playerNumber).size() == SHIP_COUNT) {
+            alive = false;
+            // perform a safety check before declaring dead
 
-        ArrayList<Integer> boardContents = new ArrayList<>();
-        boardContents = myGameFactory.getPlayerBoard(myGameFactory.getOpposite(playerTurn));
-
-        Log.d("TEST_BATTLESHIP", "Board Grid is" + boardContents.toString());
-
-
-        myHandler.postDelayed(displayTurnResults, 100);
-
-        if (result > 4)  // it was a miss, switch turns?? Always switch turns?
-        {
-            playerTurn = myGameFactory.getOpposite(playerTurn);
-            newTurn = true;
-        }
-        else {
-            if (!myGameFactory.fleetStillAlive(playerTurn))
-            {
-                processWinner(playerTurn);
-                finished = true;
+            for (int i = 0; i < BOARD_SIZE; ++ i) {
+                if (boards.get(playerNumber).getElementAtBoardPosition(i) < 50)
+                    alive = true;
             }
+
         }
 
-        Log.d("TEST_BATTLESHIP", "After Switching Turns, next Turn is" + playerTurn);
-        Log.d("TEST_BATTLESHIP", "newTurn is: " + newTurn);
+        return alive;
 
+    }
+
+    public boolean shipStillAlive(int playerNumber, int positionNumber) {
+        int shipNumber = positionNumber/10;
+        int shipStartPosition = shipNumber * 10;
+        Log.d("TEST", "SHIP NUMBER from shipStillAlive() is " + shipNumber + "and shipStartPosition is " + shipStartPosition );
+        boolean alive = false;
+
+
+            for (int i = 0; i < Ship.getShipLength(shipNumber); ++i) {
+                if (boards.get(playerNumber).boardContains(shipStartPosition + i)) {
+                    Log.d("TEST", "SHIP POSITION from shipStillAlive() is " + shipStartPosition+i);
+                    alive = true;
+                }
+            }
+
+        return alive;
 
     }
 
 
-    public void processWinner(int playerNumber) {
-
+    public int getBoardCellValueByPlayer(int playerNumber, int position) {
+        return this.getPlayerBoard(playerNumber).getElementAtBoardPosition(position);
     }
 
 
-    private Runnable displayTurnResults = new Runnable() {
-        public void run() {
-
-            if (playerTurn == 0)
-                resultsTextView.setText("Player1 Results");
-            else
-                resultsTextView.setText("Computer Results");
-            myHandler.postDelayed(this, 100);
-        }
-
-    };
 
 
-    private void fire() {
-        Toast.makeText(this, "Fire torpedoes", Toast.LENGTH_LONG).show();
-    }
+
 }

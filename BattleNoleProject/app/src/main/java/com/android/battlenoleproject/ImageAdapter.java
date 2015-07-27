@@ -2,6 +2,7 @@ package com.android.battlenoleproject; /**
  * Created by srandall on 7/12/15.
  */
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -25,18 +26,18 @@ public class ImageAdapter extends BaseAdapter {
     private ImageView[] boardFields = new ImageView[FIELDS_COUNT];
 
     private static final int[] drawableHorizontal = new int[]{
-            R.drawable.destroyer1, R.drawable.destroyer2,
-            R.drawable.sub1, R.drawable.sub2, R.drawable.sub3,
-            R.drawable.bs1, R.drawable.bs2, R.drawable.bs3, R.drawable.bs4,
-            R.drawable.c1, R.drawable.c2, R.drawable.c3, R.drawable.c4, R.drawable.c5
+        R.drawable.destroyer1, R.drawable.destroyer2,
+                R.drawable.sub1, R.drawable.sub2, R.drawable.sub3,
+                R.drawable.bs1, R.drawable.bs2, R.drawable.bs3, R.drawable.bs4,
+                R.drawable.c1, R.drawable.c2, R.drawable.c3, R.drawable.c4, R.drawable.c5
     };
 
 
     private static final int[] drawableVertical = new int[]{
-            R.drawable.destroyerv1, R.drawable.destroyerv2,
-            R.drawable.subv1, R.drawable.subv2, R.drawable.subv3,
-            R.drawable.bsv1, R.drawable.bsv2, R.drawable.bsv3, R.drawable.bsv4,
-            R.drawable.cv1, R.drawable.cv2, R.drawable.cv3, R.drawable.cv4, R.drawable.cv5
+        R.drawable.destroyerv1, R.drawable.destroyerv2,
+                R.drawable.subv1, R.drawable.subv2, R.drawable.subv3,
+                R.drawable.bsv1, R.drawable.bsv2, R.drawable.bsv3, R.drawable.bsv4,
+                R.drawable.cv1, R.drawable.cv2, R.drawable.cv3, R.drawable.cv4, R.drawable.cv5
 
     };
 
@@ -118,7 +119,7 @@ public class ImageAdapter extends BaseAdapter {
 
 
 
-            //   Log.d(TAG, "Ship" + shipCount + "Coordinates are " + shipCoordinates.toString());
+         //   Log.d(TAG, "Ship" + shipCount + "Coordinates are " + shipCoordinates.toString());
 
             if (shipCoordinates.indexOf(position) != -1) {
                 int j = shipCoordinates.indexOf(position);
@@ -147,25 +148,6 @@ public class ImageAdapter extends BaseAdapter {
                 break;
             }
 
-        }
-
-        for (int shipCount = 0; shipCount < fleet.length; ++shipCount) {  // for each ship
-
-            ArrayList<Integer> shipHits = new ArrayList<Integer>(fleet[shipCount].getNumberOfHits());
-
-            shipHits.addAll(fleet[shipCount].getHits());
-
-            if (shipHits.indexOf(position) != -1) {
-                imageResource = R.drawable.fire;
-            }
-        }
-
-        ArrayList<Integer> misses = new ArrayList<Integer>(Ship.getNumberOfMisses());
-
-        misses.addAll(Ship.getMisses());
-
-        if (misses.indexOf(position) != -1) {
-            imageResource = R.drawable.fire;
         }
 
 

@@ -1,0 +1,10 @@
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/setup_gridview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:stretchMode="columnWidth"
+    android:background="@android:color/black"
+    android:horizontalSpacing="1dp"
+    android:numColumns="10" >
+</GridView>

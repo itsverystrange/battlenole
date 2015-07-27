@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              tools:context="com.android.battleship.Game">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.android.battleship.Game">
 
     <!-- Header -->
 
@@ -51,22 +51,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:id="@+id/grid_holder"
         android:background="@android:color/white"
         >
 
-        <GridView
-            android:id="@+id/setup_gridview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0.8"
-            android:background="@android:color/black"
-            android:gravity="center"
-            android:horizontalSpacing="1dp"
-            android:numColumns="10"
-            android:stretchMode="columnWidth">
-
-
-        </GridView>
 
     </FrameLayout>
 
@@ -103,32 +91,22 @@
                 android:gravity="center"
                 android:layout_weight="1">
 
-                <ImageView
-                    android:id="@+id/submarine"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/submarine"
-                    android:layout_gravity="bottom"/>
 
                 <ImageView
                     android:id="@+id/small_ship"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:scaleType="fitXY"
+                    android:layout_height="20dp"
+                    android:layout_weight=".8"
                     android:src="@drawable/small_ship"
                     android:layout_gravity="bottom"/>
 
                 <ImageView
-                    android:id="@+id/battleship"
+                    android:id="@+id/submarine"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:layout_weight="1"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/battleship"/>
+                    android:layout_weight=".8"
+                    android:src="@drawable/submarine"
+                    android:layout_gravity="bottom"/>
 
             </LinearLayout>
             <!-- End Ship Status Top -->
@@ -145,18 +123,16 @@
 
                 <ImageView
                     android:id="@+id/destroyer"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:scaleType="fitXY"
+                    android:layout_weight=".8"
                     android:src="@drawable/destroyer"/>
 
                 <ImageView
                     android:id="@+id/aircraft_carrier"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:scaleType="fitXY"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_weight=".8"
                     android:src="@drawable/aircraft_carrier"
                     />
             </LinearLayout>
