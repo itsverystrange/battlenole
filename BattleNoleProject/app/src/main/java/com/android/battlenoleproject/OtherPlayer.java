@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,7 +53,12 @@ public class OtherPlayer extends Activity
 
     private int lastEnemyHit;
 
+    private int result;
+    private int turn;
+
     private TextView topTV;
+
+    private ImageButton overlay;
 
     private ImageView submarine;
     private ImageView smallShip;
@@ -79,7 +85,19 @@ public class OtherPlayer extends Activity
 
         setContentView(R.layout.activity_game);
 
+        overlay = (ImageButton) findViewById(R.id.overlayBtn);
+        overlay.setVisibility(View.GONE);
+
+        overlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                overlay.setVisibility(View.GONE);
+            }
+        });
+
         Bundle bundle = getIntent().getExtras();
+
+        turn = 1;
 
         Parcelable ps1[] = bundle.getParcelableArray("player1Ships");
         Parcelable ps2[] = bundle.getParcelableArray("player2Ships");
@@ -221,7 +239,7 @@ public class OtherPlayer extends Activity
     public void processPlayerFire(int position) {
 
 
-        int result = this.game.processMove(playerTurn, position);
+        result = this.game.processMove(playerTurn, position);
 
         if (result == FIRE_BAD_FIRE) {
             topTV.setText("Cell already Selected. Please pick again");
@@ -309,7 +327,6 @@ public class OtherPlayer extends Activity
         }
     }
 
-
     public void processWinner(int playerNumber) {
         int playerWinner = playerNumber + 1;
         playerTurn = -1;
@@ -363,6 +380,11 @@ public class OtherPlayer extends Activity
                     aircraftCarrier.setImageDrawable(null);
             }
 
+            if (result == FIRE_MISS) {
+                overlay.setVisibility(View.VISIBLE);
+            }
+
+            ++turn;
 
             playGame();
       /* and here comes the "trick" */

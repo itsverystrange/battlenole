@@ -100,7 +100,6 @@ public class EnemyBoardFragment extends Fragment {
 
 
 
-
     }
 
 
@@ -190,9 +189,5 @@ public class EnemyBoardFragment extends Fragment {
 
 
     }
-
-
-
-
 
 }

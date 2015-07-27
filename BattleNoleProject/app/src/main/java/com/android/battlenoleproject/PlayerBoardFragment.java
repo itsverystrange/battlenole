@@ -136,7 +136,6 @@ public class PlayerBoardFragment extends Fragment {
         this.board.setElementAtBoardPosition(position, result);
         playerImageAdapter.swapBoards(this.board);
 
-
     }
 
 

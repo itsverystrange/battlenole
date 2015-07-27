@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +55,8 @@ public class PlayComputerActivity extends Activity
 
     private TextView topTV;
 
+    private ImageButton overlay;
+
     private ImageView submarine;
     private ImageView smallShip;
     private ImageView destroyer;
@@ -64,6 +67,9 @@ public class PlayComputerActivity extends Activity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_game);
+
+        overlay = (ImageButton) findViewById(R.id.overlayBtn);
+        overlay.setVisibility(View.GONE);
 
         Bundle bundle = getIntent().getExtras();
 
